@@ -137,12 +137,5 @@ This project was developed as part of the Conrad assessment, demonstrating:
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 📞 Contact
-
-Conrad Assessment Team - assessment@conrad.com
-
-Project Repository: [Conrad User Management Dashboard](https://github.com/conrad-assessment/user-management-dashboard)
-
----
 
 **💡 Pro Tip:** Always ensure you have the latest version of dependencies and keep your application secure and up-to-date!
