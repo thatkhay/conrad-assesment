@@ -62,7 +62,7 @@ src/
 1. Clone the repository
 ```bash
 git clone https://github.com/conrad-assessment/user-management-dashboard.git
-cd user-management-dashboard
+cd my-app
 ```
 
 2. Install dependencies
