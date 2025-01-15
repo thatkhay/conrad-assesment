@@ -4,11 +4,8 @@
 
 This User Management Dashboard has been developed as part of the assessment for Conrad, demonstrating a robust React application designed to provide comprehensive user administration capabilities. The solution offers an intuitive interface for managing user accounts, featuring advanced filtering, pagination, and CRUD (Create, Read, Update, Delete) operations.
 
-![Conrad User Management Dashboard Preview](./preview.png)
+![Uploading Screenshot 2025-01-15 115529.png…]()
 
-## 🏢 About Conrad
-
-Conrad is a leading technology and innovation company committed to excellence in user management and enterprise solutions. This assessment project reflects Conrad's dedication to creating efficient, user-friendly administrative tools.
 
 ## ✨ Key Features
 
@@ -140,12 +137,5 @@ This project was developed as part of the Conrad assessment, demonstrating:
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## 📞 Contact
-
-Conrad Assessment Team - assessment@conrad.com
-
-Project Repository: [Conrad User Management Dashboard](https://github.com/conrad-assessment/user-management-dashboard)
-
----
 
 **💡 Pro Tip:** Always ensure you have the latest version of dependencies and keep your application secure and up-to-date!
