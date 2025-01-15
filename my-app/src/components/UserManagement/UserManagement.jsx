@@ -14,7 +14,16 @@ import UserForm from './UserForm';
 import ConfirmationModal from '../ui/ComfirmModal';
 
 const UserManagement = ({ showNotification }) => {
-  const { users, addUser, updateUser, deleteUser } = useContext(UserContext);
+  const { 
+    users, 
+    addUser, 
+    updateUser, 
+    deleteUser, 
+    canEditUser,
+    canDeleteUser,
+    canAddUser 
+  } = useContext(UserContext);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,7 +76,7 @@ const UserManagement = ({ showNotification }) => {
       setIsModalOpen(false);
       setEditingUser(null);
     } catch (error) {
-      showNotification('Error processing user', 'error');
+      showNotification(error.message || 'Error processing user', 'error');
     }
   };
 
@@ -78,7 +87,7 @@ const UserManagement = ({ showNotification }) => {
         showNotification('User deleted successfully', 'success');
         setConfirmDeleteUser(null);
       } catch (error) {
-        showNotification('Error deleting user', 'error');
+        showNotification(error.message || 'Error deleting user', 'error');
       }
     }
   };
@@ -114,16 +123,18 @@ const UserManagement = ({ showNotification }) => {
             <option value="Editor">Editor</option>
             <option value="Viewer">Viewer</option>
           </select>
-          <button
-            onClick={() => {
-              setEditingUser(null);
-              setIsModalOpen(true);
-            }}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <PlusCircle className="h-5 w-5 mr-2" />
-            Add User
-          </button>
+          {canAddUser() && (
+            <button
+              onClick={() => {
+                setEditingUser(null);
+                setIsModalOpen(true);
+              }}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <PlusCircle className="h-5 w-5 mr-2" />
+              Add User
+            </button>
+          )}
         </div>
       </div>
 
@@ -154,21 +165,25 @@ const UserManagement = ({ showNotification }) => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
-                    <button
-                      onClick={() => {
-                        setEditingUser(user);
-                        setIsModalOpen(true);
-                      }}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <Edit2 className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => setConfirmDeleteUser(user)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
+                    {canEditUser(user) && (
+                      <button
+                        onClick={() => {
+                          setEditingUser(user);
+                          setIsModalOpen(true);
+                        }}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                    )}
+                    {canDeleteUser() && (
+                      <button
+                        onClick={() => setConfirmDeleteUser(user)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

@@ -46,26 +46,26 @@ const validateUserData = (userData, isUpdate = false) => {
   return userData;
 };
 
-// Initial users data
+// Initial users data with added currentUser
 export const initialUsers = [
   { 
     id: uuidv4(), 
-    name: 'Alice Johnson', 
-    email: 'alice@example.com', 
+    name: 'Admin User', 
+    email: 'admin@conrad.com', 
     role: 'Admin',
     createdAt: new Date().toISOString()
   },
   { 
     id: uuidv4(), 
-    name: 'Bob Smith', 
-    email: 'bob@example.com', 
+    name: 'Editor User', 
+    email: 'editor@conrad.com', 
     role: 'Editor',
     createdAt: new Date().toISOString()
   },
   { 
     id: uuidv4(), 
-    name: 'Charlie Brown', 
-    email: 'charlie@example.com', 
+    name: 'Viewer User', 
+    email: 'viewer@conrad.com', 
     role: 'Viewer',
     createdAt: new Date().toISOString()
   },
@@ -74,18 +74,20 @@ export const initialUsers = [
 // Create context
 export const UserContext = createContext();
 
-// Action types with more descriptive names
+// Action types
 const ACTION_TYPES = {
   ADD_USER: 'ADD_USER',
   UPDATE_USER: 'UPDATE_USER',
   DELETE_USER: 'DELETE_USER',
   SET_USERS: 'SET_USERS',
+  SET_CURRENT_USER: 'SET_CURRENT_USER',
   SET_LOADING: 'SET_LOADING',
   SET_ERROR: 'SET_ERROR',
   CLEAR_ERROR: 'CLEAR_ERROR'
 };
 
 const USERS_STORAGE_KEY = 'dashboard_users';
+const CURRENT_USER_KEY = 'dashboard_current_user';
 
 // Helper functions for localStorage with enhanced error handling
 const loadFromStorage = () => {
@@ -106,9 +108,28 @@ const saveToStorage = (users) => {
   }
 };
 
+const loadCurrentUser = () => {
+  try {
+    const storedCurrentUser = localStorage.getItem(CURRENT_USER_KEY);
+    return storedCurrentUser ? JSON.parse(storedCurrentUser) : initialUsers[0];
+  } catch (error) {
+    console.error('Error loading current user from localStorage:', error);
+    return initialUsers[0];
+  }
+};
+
+const saveCurrentUser = (user) => {
+  try {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  } catch (error) {
+    console.error('Error saving current user to localStorage:', error);
+  }
+};
+
 // Initial state structure
 const initialState = {
   users: [],
+  currentUser: null,
   isLoading: false,
   error: null
 };
@@ -128,6 +149,12 @@ const userReducer = (state, action) => {
     
     case ACTION_TYPES.CLEAR_ERROR:
       return { ...state, error: null };
+    
+    case ACTION_TYPES.SET_CURRENT_USER:
+      return { 
+        ...state, 
+        currentUser: action.payload 
+      };
     
     case ACTION_TYPES.ADD_USER:
       return {
@@ -172,14 +199,42 @@ export const UserProvider = ({ children }) => {
   // Initialize state from localStorage with useReducer
   const [state, dispatch] = useReducer(userReducer, initialState, () => {
     const storedUsers = loadFromStorage();
+    const storedCurrentUser = loadCurrentUser();
     return {
       ...initialState,
-      users: storedUsers
+      users: storedUsers,
+      currentUser: storedCurrentUser
     };
   });
 
+  // Role-based access control helpers
+  const canEditUser = (currentUser, userToEdit) => {
+    // Admin can edit anyone
+    if (currentUser.role === 'Admin') return true;
+    
+    // Editors can edit non-Admin users
+    if (currentUser.role === 'Editor' && userToEdit.role !== 'Admin') return true;
+    
+    return false;
+  };
+
+  const canDeleteUser = (currentUser) => {
+    // Only Admins can delete users
+    return currentUser.role === 'Admin';
+  };
+
+  const canAddUser = (currentUser) => {
+    // Only Admins can add new users
+    return currentUser.role === 'Admin';
+  };
+
   // Enhanced user management functions with validation and error handling
   const addUser = (userData) => {
+    // Check if current user can add users
+    if (!canAddUser(state.currentUser)) {
+      throw new Error('You do not have permission to add users');
+    }
+
     try {
       // Start loading
       dispatch({ type: ACTION_TYPES.SET_LOADING, payload: true });
@@ -213,6 +268,11 @@ export const UserProvider = ({ children }) => {
   };
 
   const updateUser = (userData) => {
+    // Check if current user can edit this user
+    if (!canEditUser(state.currentUser, userData)) {
+      throw new Error('You do not have permission to edit this user');
+    }
+
     try {
       // Start loading
       dispatch({ type: ACTION_TYPES.SET_LOADING, payload: true });
@@ -248,6 +308,11 @@ export const UserProvider = ({ children }) => {
   };
 
   const deleteUser = (userId) => {
+    // Check if current user can delete users
+    if (!canDeleteUser(state.currentUser)) {
+      throw new Error('You do not have permission to delete users');
+    }
+
     try {
       // Start loading
       dispatch({ type: ACTION_TYPES.SET_LOADING, payload: true });
@@ -269,6 +334,12 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // Change current user
+  const setCurrentUser = (user) => {
+    dispatch({ type: ACTION_TYPES.SET_CURRENT_USER, payload: user });
+    saveCurrentUser(user);
+  };
+
   // Error management
   const clearError = () => {
     dispatch({ type: ACTION_TYPES.CLEAR_ERROR });
@@ -280,7 +351,11 @@ export const UserProvider = ({ children }) => {
     addUser,
     updateUser,
     deleteUser,
-    clearError
+    clearError,
+    setCurrentUser,
+    canEditUser: (userToEdit) => canEditUser(state.currentUser, userToEdit),
+    canDeleteUser: () => canDeleteUser(state.currentUser),
+    canAddUser: () => canAddUser(state.currentUser)
   };
 
   return (
