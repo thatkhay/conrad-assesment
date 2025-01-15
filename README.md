@@ -4,7 +4,6 @@
 
 This User Management Dashboard has been developed as part of the assessment for Conrad, demonstrating a robust React application designed to provide comprehensive user administration capabilities. The solution offers an intuitive interface for managing user accounts, featuring advanced filtering, pagination, and CRUD (Create, Read, Update, Delete) operations.
 
-![Uploading Screenshot 2025-01-15 115529.png…]()
 
 
 ## ✨ Key Features
